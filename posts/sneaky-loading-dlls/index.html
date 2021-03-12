@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Sneaky loading DLLs in a Windows executable | var Blog, a variable blog...</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="This post is a walk through on how to load DLLs “manually” without the use of the WinAPI LoadLibrary and store APIs addresses in memory in order to make it less obvious which API functions are imported (and therefore used) by the malware.
+With this technique, the malware analyst cannot see which functions are imported from the Import section. It will be necessary to step through the code to find out which API functions are actually used.">
+    <meta name="generator" content="Hugo 0.81.0" />
+    
+    
+      <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+    
+
+    
+
+  
+  
+    <link rel="stylesheet" href="/ananke/dist/main.css_5c99d70a7725bacd4c701e995b969fea.css" >
+  
+
+
+
+
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Sneaky loading DLLs in a Windows executable" />
+<meta property="og:description" content="This post is a walk through on how to load DLLs “manually” without the use of the WinAPI LoadLibrary and store APIs addresses in memory in order to make it less obvious which API functions are imported (and therefore used) by the malware.
+With this technique, the malware analyst cannot see which functions are imported from the Import section. It will be necessary to step through the code to find out which API functions are actually used." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/posts/sneaky-loading-dlls/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-03-12T11:15:15&#43;01:00" />
+<meta property="article:modified_time" content="2021-03-12T11:15:15&#43;01:00" />
+
+<meta itemprop="name" content="Sneaky loading DLLs in a Windows executable">
+<meta itemprop="description" content="This post is a walk through on how to load DLLs “manually” without the use of the WinAPI LoadLibrary and store APIs addresses in memory in order to make it less obvious which API functions are imported (and therefore used) by the malware.
+With this technique, the malware analyst cannot see which functions are imported from the Import section. It will be necessary to step through the code to find out which API functions are actually used."><meta itemprop="datePublished" content="2021-03-12T11:15:15&#43;01:00" />
+<meta itemprop="dateModified" content="2021-03-12T11:15:15&#43;01:00" />
+<meta itemprop="wordCount" content="1962">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Sneaky loading DLLs in a Windows executable"/>
+<meta name="twitter:description" content="This post is a walk through on how to load DLLs “manually” without the use of the WinAPI LoadLibrary and store APIs addresses in memory in order to make it less obvious which API functions are imported (and therefore used) by the malware.
+With this technique, the malware analyst cannot see which functions are imported from the Import section. It will be necessary to step through the code to find out which API functions are actually used."/>
+
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        var Blog, a variable blog...
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        POSTS
+      </aside>
+      
+
+
+
+
+  <div id="sharing" class="mt3">
+
+    
+    <a href="https://www.facebook.com/sharer.php?u=http://example.org/posts/sneaky-loading-dlls/" class="facebook no-underline" aria-label="share on Facebook">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M28.765,50.32h6.744V33.998h4.499l0.596-5.624h-5.095  l0.007-2.816c0-1.466,0.14-2.253,2.244-2.253h2.812V17.68h-4.5c-5.405,0-7.307,2.729-7.307,7.317v3.377h-3.369v5.625h3.369V50.32z   M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;"/></svg>
+
+    </a>
+
+    
+    
+    <a href="https://twitter.com/share?url=http://example.org/posts/sneaky-loading-dlls/&amp;text=Sneaky%20loading%20DLLs%20in%20a%20Windows%20executable" class="twitter no-underline" aria-label="share on Twitter">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/></svg>
+
+    </a>
+
+    
+    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http://example.org/posts/sneaky-loading-dlls/&amp;title=Sneaky%20loading%20DLLs%20in%20a%20Windows%20executable" class="linkedin no-underline" aria-label="share on LinkedIn">
+      <svg  height="32px"  style="enable-background:new 0 0 65 65;" version="1.1" viewBox="0 0 65 65" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M50.837,48.137V36.425c0-6.275-3.35-9.195-7.816-9.195  c-3.604,0-5.219,1.983-6.119,3.374V27.71h-6.79c0.09,1.917,0,20.427,0,20.427h6.79V36.729c0-0.609,0.044-1.219,0.224-1.655  c0.49-1.22,1.607-2.483,3.482-2.483c2.458,0,3.44,1.873,3.44,4.618v10.929H50.837z M22.959,24.922c2.367,0,3.842-1.57,3.842-3.531  c-0.044-2.003-1.475-3.528-3.797-3.528s-3.841,1.524-3.841,3.528c0,1.961,1.474,3.531,3.753,3.531H22.959z M34,64  C17.432,64,4,50.568,4,34C4,17.431,17.432,4,34,4s30,13.431,30,30C64,50.568,50.568,64,34,64z M26.354,48.137V27.71h-6.789v20.427  H26.354z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+
+    </a>
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Sneaky loading DLLs in a Windows executable</h1>
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2021-03-12T11:15:15+01:00">March 12, 2021</time>
+
+      
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><p>This post is a walk through on how to load DLLs “manually” without the use of the WinAPI LoadLibrary and store APIs addresses in memory in order to make it less obvious which API functions are imported (and therefore used) by the malware.</p>
+<p>With this technique, the malware analyst cannot see which functions are imported from the Import section. It will be necessary to step through the code to find out which API functions are actually used.</p>
+<p>The first section describes how to jump among Windows data structures to get information on DLLs loaded and where the base address is. What follows is a description on how to parse the PE structure of the DLL to get to the exported functions and their address in memory.</p>
+<h2 id="how-to-obtain-the-base-address-of-a-dll">How to obtain the base address of a DLL</h2>
+<p>The base address is the address where the DLL has been loaded to memory. First step to obtain the base address is to get the PEB (Process Environment Block) address. There are two ways to get it:</p>
+<ol>
+<li>This value can be found adding 0x30 to the pointer stored in the FS segment register.</li>
+<li>Alternatively it is possible to start one step ahead and get the PEB address from the TEB (Thread Environment Block). The address of the TEB is stored at offset 0x18 from the address pointed by the FS segment register. And the PEB address is stored in the TEB structure at offset 0x30.</li>
+</ol>
+<p>In pseudo-arithmetics of pointers this would translate to:</p>
+<ol>
+<li><code>*PEB = *FS + 0x30</code></li>
+<li><code>*PEB = *TEB + 0x30 = *(*FS + 0x18) + 0x30</code></li>
+</ol>
+<p>PEB structure is a user-mode data structure, mostly used by the operating system, which is <a href="https://www.aldeid.com/wiki/PEB-Process-Environment-Block#Syntax">defined</a> as follow.</p>
+<pre><code>struct _PEB {
+    0x000 BYTE InheritedAddressSpace;
+    0x001 BYTE ReadImageFileExecOptions;
+    0x002 BYTE BeingDebugged;
+    0x003 BYTE SpareBool;
+    0x004 void* Mutant;
+    0x008 void* ImageBaseAddress;
+    0x00c _PEB_LDR_DATA* Ldr;
+    0x010 _RTL_USER_PROCESS_PARAMETERS* ProcessParameters;
+    0x014 void* SubSystemData;
+    0x018 void* ProcessHeap;
+    0x01c _RTL_CRITICAL_SECTION* FastPebLock;
+    0x020 void* FastPebLockRoutine;
+    0x024 void* FastPebUnlockRoutine;
+    0x028 DWORD EnvironmentUpdateCount;
+    0x02c void* KernelCallbackTable;
+    0x030 DWORD SystemReserved[1];
+    0x034 DWORD ExecuteOptions:2; // bit offset: 34, len=2
+    0x034 DWORD SpareBits:30; // bit offset: 34, len=30
+    0x038 _PEB_FREE_BLOCK* FreeList;
+    0x03c DWORD TlsExpansionCounter;
+    0x040 void* TlsBitmap;
+    0x044 DWORD TlsBitmapBits[2];
+    0x04c void* ReadOnlySharedMemoryBase;
+    0x050 void* ReadOnlySharedMemoryHeap;
+    0x054 void** ReadOnlyStaticServerData;
+    0x058 void* AnsiCodePageData;
+    0x05c void* OemCodePageData;
+    0x060 void* UnicodeCaseTableData;
+    0x064 DWORD NumberOfProcessors;
+    0x068 DWORD NtGlobalFlag;
+    0x070 _LARGE_INTEGER CriticalSectionTimeout;
+    0x078 DWORD HeapSegmentReserve;
+    0x07c DWORD HeapSegmentCommit;
+    0x080 DWORD HeapDeCommitTotalFreeThreshold;
+    0x084 DWORD HeapDeCommitFreeBlockThreshold;
+    0x088 DWORD NumberOfHeaps;
+    0x08c DWORD MaximumNumberOfHeaps;
+    0x090 void** ProcessHeaps;
+    0x094 void* GdiSharedHandleTable;
+    0x098 void* ProcessStarterHelper;
+    0x09c DWORD GdiDCAttributeList;
+    0x0a0 void* LoaderLock;
+    0x0a4 DWORD OSMajorVersion;
+    0x0a8 DWORD OSMinorVersion;
+    0x0ac WORD OSBuildNumber;
+    0x0ae WORD OSCSDVersion;
+    0x0b0 DWORD OSPlatformId;
+    0x0b4 DWORD ImageSubsystem;
+    0x0b8 DWORD ImageSubsystemMajorVersion;
+    0x0bc DWORD ImageSubsystemMinorVersion;
+    0x0c0 DWORD ImageProcessAffinityMask;
+    0x0c4 DWORD GdiHandleBuffer[34];
+    0x14c void (*PostProcessInitRoutine)();
+    0x150 void* TlsExpansionBitmap;
+    0x154 DWORD TlsExpansionBitmapBits[32];
+    0x1d4 DWORD SessionId;
+    0x1d8 _ULARGE_INTEGER AppCompatFlags;
+    0x1e0 _ULARGE_INTEGER AppCompatFlagsUser;
+    0x1e8 void* pShimData;
+    0x1ec void* AppCompatInfo;
+    0x1f0 _UNICODE_STRING CSDVersion;
+    0x1f8 void* ActivationContextData;
+    0x1fc void* ProcessAssemblyStorageMap;
+    0x200 void* SystemDefaultActivationContextData;
+    0x204 void* SystemAssemblyStorageMap;
+    0x208 DWORD MinimumStackCommit;
+);
+</code></pre><p>In the PEB structure we are looking for the field Lrd at offset 0x0c, which is a pointer to the <a href="https://www.aldeid.com/wiki/PEB_LDR_DATA">PEB LDR DATA</a> structure. This structure contains information about all the modules loaded in the current process.</p>
+<pre><code>typedef struct _PEB_LDR_DATA
+{
+    0x00    ULONG         Length;                            /* Size of structure, used by ntdll.dll as structure version ID */
+    0x04    BOOLEAN       Initialized;                       /* If set, loader data section for current process is initialized */
+    0x08    PVOID         SsHandle;
+    0x0c    LIST_ENTRY    InLoadOrderModuleList;             /* Pointer to LDR_DATA_TABLE_ENTRY structure. Previous and next module in load order */
+    0x14    LIST_ENTRY    InMemoryOrderModuleList;           /* Pointer to LDR_DATA_TABLE_ENTRY structure. Previous and next module in memory placement order */
+    0x1c    LIST_ENTRY    InInitializationOrderModuleList;   /* Pointer to LDR_DATA_TABLE_ENTRY structure. Previous and next module in initialization order */
+} PEB_LDR_DATA,*PPEB_LDR_DATA; // +0x24
+</code></pre><p>The last three fields of this structure are pointers to the first element of a linked list, which contains information about the DLLs loaded in the process memory. The difference among the three linked lists is that they contain the same entries but in different order.</p>
+<p>Each element of the linked list is a data structure called <a href="https://www.aldeid.com/wiki/LDR_DATA_TABLE_ENTRY">LDR DATA TABLE ENTRY</a>, and its structure is defined as follows.</p>
+<pre><code>typedef struct _LDR_DATA_TABLE_ENTRY
+{
+    LIST_ENTRY InLoadOrderLinks; /* 0x00 */
+    LIST_ENTRY InMemoryOrderLinks; /* 0x08 */
+    LIST_ENTRY InInitializationOrderLinks; /* 0x10 */
+    PVOID DllBase; /* 0x18 */
+    PVOID EntryPoint;
+    ULONG SizeOfImage;
+    UNICODE_STRING FullDllName; /* 0x24 */
+    UNICODE_STRING BaseDllName; /* 0x28 */
+    ULONG Flags;
+    WORD LoadCount;
+    WORD TlsIndex;
+    union
+    {
+         LIST_ENTRY HashLinks;
+         struct
+         {
+              PVOID SectionPointer;
+              ULONG CheckSum;
+         };
+    };
+    union
+    {
+         ULONG TimeDateStamp;
+         PVOID LoadedImports;
+    };
+    _ACTIVATION_CONTEXT * EntryPointActivationContext;
+    PVOID PatchInformation;
+    LIST_ENTRY ForwarderLinks;
+    LIST_ENTRY ServiceTagLinks;
+    LIST_ENTRY StaticLinks;
+} LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
+</code></pre><p>It is important to observe here that the InInitialisationOrderModuleList of the previous element of the linked list does not point to offset 0x00 of the current list element, it points instead to the third element, i.e. offset 0x10, and might be deduced by the name of the structure field “InInitialisationOrderLinks”.</p>
+<p>From this data structure we are interested in FullDllName at offset 0x24, to check if this is the DLL we were looking for. <strong>The field BaseAddress at offset 0x18 in a pointer to the base address of the DLL.</strong></p>
+<p>In pseudo code this will be:</p>
+<pre><code>TEB := *(FS + 18h)
+PEB := *(TEB + 30h)
+PEB LDR DATA := *(PEB + 0x0c)
+InInitialisationOrderLinks := LDR DATA TABLE ENTRY + 0x10 = *(PEB LDR DATA + 0x1c)   
+FullDllName := (InInitialisationOrderLinks + 0x14)
+DllBase := (InInitialisationOrderLinks + 0x08)
+</code></pre><p><em>A useful obfuscation technique</em> might be to hardcode the hash of the interesting DLLs in the code and once reached this point in the data structure while iterating to find the right DLL, calculate the hash of the FullDllName and compare this value with the hardcoded hash. This way no strings representing the name of the DLL will be found in the code.</p>
+<h2 id="getting-api-addresses-from-dll-base-address">Getting API addresses from DLL base address</h2>
+<p>To obtain the API address it is necessary to parse the PE structure of the DLL, specifically  in the Exported Table section. Image from <a href="https://stackoverflow.com/questions/34684660/how-to-determine-the-size-of-an-pe-executable-file-from-headers-and-or-footers">here</a>.</p>
+<p><img src="/loaddll/image1.png" alt="PEStructure"></p>
+<p>The DLL base address points to the beginning of the PE, where the MZ signature (0x4d5a) is.
+Offset 0x3c contains a pointer to the offset of the PE signature, as shown in the following <a href="https://www.aldeid.com/wiki/PE-Portable-executable">table</a>.</p>
+<pre><code>+ ------ + ----- + ---------- + ---------------------------------- +
+| Offset | Size  | Member     | Meaning                            |
++ ------ + ----- + ---------- + ---------------------------------- +
+| 0x00   | WORD  | emagic     | Magic DOS signature MZ (0x4d 0x5A) |
+| 0x02   | WORD  | e_cblp     | Bytes on last page of file         |
+| 0x04   | WORD  | e_cp	      | Pages in file                      |
+| 0x06   | WORD  | e_crlc     | Relocations                        |
+| 0x08   | WORD  | e_cparhdr  | Size of header in paragraphs       |
+| 0x0A   | WORD  | e_minalloc | Minimum extra paragraphs needed    |
+| 0x0C   | WORD  | e_maxalloc | Maximum extra paragraphs needed    |
+| 0x0E   | WORD  | e_ss	      | Initial (relative) SS value        |
+| 0x10   | WORD  | e_sp	      | Initial SP value                   |
+| 0x12   | WORD  | e_csum     | Checksum                           |
+| 0x14   | WORD  | e_ip	      | Initial IP value                   |
+| 0x16   | WORD  | e_cs	      | Initial (relative) CS value        |
+| 0x18   | WORD  | e_lfarlc   | File address of relocation table   |
+| 0x1A   | WORD  | e_ovno     | Overloay number                    |
+| 0x1C   | WORD  | e_res[4]   | Reserved words (4 WORDs)           |
+| 0x24   | WORD  | e_oemid    | OEM identifier (for e_oeminfo)     |
+| 0x26   | WORD  | e_oeminfo  | OEM information; e_oemid specific  |
+| 0x28   | WORD  | e_res2[10] | Reserved words (10 WORDs)          |
+| 0x3c   | DWORD | e_lfanew   | Offset to start of PE header       |
++ ------ + ----- + ---------- + ---------------------------------- +
+</code></pre><p>At offset <a href="https://www.aldeid.com/wiki/PE-Portable-executable#PE_Header">0x78</a> starting from the PE header section, there is the Relative Virtual Address of the export table, the table containing the information about the PE exported functions.</p>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<pre><code>+ ------ + ----- + ------------ + ----------------------- +
+| Offset | Size  | Member       | Meaning                 |
++ ------ + ----- + ------------ + ----------------------- +
+| 0x78   | DWORD | Export Table | RVA of Export Directory |
++ ------ + ----- + ------------ + ----------------------- +
+
+</code></pre><p>This is how the export table looks like.</p>
+<pre><code>+ ------ + ------ + --------------------------------------------- + ------------------------------------------------------------------------------------------------------------------------------------------------------------- +
+| Offset | Size   | Field                                         | Description                                                                                                                                                   |
++ ------ + ------ + --------------------------------------------- + ------------------------------------------------------------------------------------------------------------------------------------------------------------ +
+| 0x00   | DWORD  | Characteristics (Export Flags)                | Reserved, must be 0.                                                                                                                                          |
+| 0x04   | DWORD  | TimeDateStamp                                 | The time and date that the export data was created.                                                                                                           |
+| 0x08   | WORD   | MajorVersion                                  | The major version number. The major and minor version numbers can be set by the user.                                                                         |
+| 0x0A   | WORD   | MinorVersion                                  | The minor version number.                                                                                                                                     |
+| 0x0C   | DWORD  | Name (Name RVA)                               | The address of the ASCII string that contains the name of the DLL. This address is relative to the image base.                                                |
+| 0x10   | DWORD  | Base (Ordinal Base)                           | The starting ordinal number for exports in this image. This field specifies the starting ordinal number for the export address table. It is usually set to 1. |
+| 0x14   | DWORD  | NumberOfFunctions (Address Table Entries)     | The number of entries in the export address table.                                                                                                            |
+| 0x18   | DWORD  | NumberOfNames (Number of Name Pointers)       | The number of entries in the name pointer table. This is also the number of entries in the ordinal table.                                                     |
+| 0x1C   | DWORD  | AddressOfFunctions (Export Address Table RVA) | The address of the export address table, relative to the image base.                                                                                          |
+| 0x20   | DWORD  | AddressOfNames (Name Pointer RVA)             | The address of the export name pointer table, relative to the image base. The table size is given by the Number of Name Pointers field.                       |
+| 0x24   | DWORD  | AddressOfNameOrdinals (Ordinal Table RVA)     | The address of the ordinal table, relative to the image base.                                                                                                 |
++ ------ + ------ + --------------------------------------------- + ------------------------------------------------------------------------------------------------------------------------------------------------------------- +
+</code></pre><!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<p>To calculate the memory address of the API, the following structure fields are needed.</p>
+<pre><code>+ ------ + --------------------- +
+| Offset | Field                 |
++ ------ + --------------------- +
+| 0x18   | NumberOfNames         |
+| 0x1c   | AddressOfFunctions    |
+| 0x20   | AddressOfNames        |
+| 0x24   | AddressOfNameOrdinals |
++ ------ + --------------------- +
+</code></pre><p>The following schema shows the connections among the lists.</p>
+<p><img src="/loaddll/image7.png" alt="NumberOfNames"></p>
+<p>The Export section might contain functions that are not exported by name (so they do not have a name, they might be instead exported by ordinal).</p>
+<p>AddressOfFunctions is a pointer to a list containing the RVA address of the exported functions.
+AddressOfNames is a pointer to a list which contains all the names of the functions which are exported by name (functions can also be exported by ordinal).</p>
+<p>AddressOfNameOrdinals is a pointer to a list that contains the ordinals (or the numerical position) of the functions which are listed in AddressOfNames, but only the ones exported by name.</p>
+<p>Example: I want to find the memory address of GetProcAddress. Since it is exported by name I will look into the AddressOfNames list to find the string GetProcAddress. I do this with a for. Once found, I use the value of the iteration parameter <code>i</code> (which corresponds to the position of the string in the list) to access <code>AddressOfNameOrdinals[i]</code>. This value corresponds to the ordinal in the AddressOfFunctions list. In other words the address of GetProcAddress is the value in <code>AddressOfFunctions[i]</code>.</p>
+<p>This address might now be stored in a structure in the malware code, so that when the needed API is called, the malware analyst will only see the element of the structure and no strings</p>
+<ul class="pa0">
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div>
+    </div>
+
+    <aside class="w-30-l mt6-l"><div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">What&#39;s in this posts</p>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#how-to-obtain-the-base-address-of-a-dll">How to obtain the base address of a DLL</a></li>
+    <li><a href="#getting-api-addresses-from-dll-base-address">Getting API addresses from DLL base address</a></li>
+  </ul>
+</nav>
+  </div>
+
+
+
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="http://example.org/" >
+    &copy;  var Blog, a variable blog... 2021 
+  </a>
+    <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+  </body>
+</html>

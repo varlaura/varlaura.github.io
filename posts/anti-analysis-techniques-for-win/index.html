@@ -35,7 +35,7 @@ An example of different behavior could be contacting a different C2 to alert the
 <meta property="og:description" content="This post is a brief collection of anti-debugging and anti-analysis techniques that I found while reversing some samples. Anti-analysis techniques&#39; purpose is to slow down the analysis as much as possible. By using these techniques a malware could detect if the malicious code is running in a monitored environment and decide to not execute at all or to behave differently, causing the analysis to be mislead.
 An example of different behavior could be contacting a different C2 to alert the attacker that some analysis is conducted on the binary (or to make superficial analysis lead to the wrong IOCs)." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="http://example.org/posts/test1/" /><meta property="article:section" content="posts" />
+<meta property="og:url" content="http://example.org/posts/anti-analysis-techniques-for-win/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2021-03-11T21:02:46&#43;01:00" />
 <meta property="article:modified_time" content="2021-03-11T21:02:46&#43;01:00" />
 
@@ -43,7 +43,7 @@ An example of different behavior could be contacting a different C2 to alert the
 <meta itemprop="description" content="This post is a brief collection of anti-debugging and anti-analysis techniques that I found while reversing some samples. Anti-analysis techniques&#39; purpose is to slow down the analysis as much as possible. By using these techniques a malware could detect if the malicious code is running in a monitored environment and decide to not execute at all or to behave differently, causing the analysis to be mislead.
 An example of different behavior could be contacting a different C2 to alert the attacker that some analysis is conducted on the binary (or to make superficial analysis lead to the wrong IOCs)."><meta itemprop="datePublished" content="2021-03-11T21:02:46&#43;01:00" />
 <meta itemprop="dateModified" content="2021-03-11T21:02:46&#43;01:00" />
-<meta itemprop="wordCount" content="1018">
+<meta itemprop="wordCount" content="1119">
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="A collection of anti-analysis techniques for Windows"/>
 <meta name="twitter:description" content="This post is a brief collection of anti-debugging and anti-analysis techniques that I found while reversing some samples. Anti-analysis techniques&#39; purpose is to slow down the analysis as much as possible. By using these techniques a malware could detect if the malicious code is running in a monitored environment and decide to not execute at all or to behave differently, causing the analysis to be mislead.
@@ -113,20 +113,20 @@ An example of different behavior could be contacting a different C2 to alert the
   <div id="sharing" class="mt3">
 
     
-    <a href="https://www.facebook.com/sharer.php?u=http://example.org/posts/test1/" class="facebook no-underline" aria-label="share on Facebook">
+    <a href="https://www.facebook.com/sharer.php?u=http://example.org/posts/anti-analysis-techniques-for-win/" class="facebook no-underline" aria-label="share on Facebook">
       <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M28.765,50.32h6.744V33.998h4.499l0.596-5.624h-5.095  l0.007-2.816c0-1.466,0.14-2.253,2.244-2.253h2.812V17.68h-4.5c-5.405,0-7.307,2.729-7.307,7.317v3.377h-3.369v5.625h3.369V50.32z   M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;"/></svg>
 
     </a>
 
     
     
-    <a href="https://twitter.com/share?url=http://example.org/posts/test1/&amp;text=A%20collection%20of%20anti-analysis%20techniques%20for%20Windows" class="twitter no-underline" aria-label="share on Twitter">
+    <a href="https://twitter.com/share?url=http://example.org/posts/anti-analysis-techniques-for-win/&amp;text=A%20collection%20of%20anti-analysis%20techniques%20for%20Windows" class="twitter no-underline" aria-label="share on Twitter">
       <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/></svg>
 
     </a>
 
     
-    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http://example.org/posts/test1/&amp;title=A%20collection%20of%20anti-analysis%20techniques%20for%20Windows" class="linkedin no-underline" aria-label="share on LinkedIn">
+    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http://example.org/posts/anti-analysis-techniques-for-win/&amp;title=A%20collection%20of%20anti-analysis%20techniques%20for%20Windows" class="linkedin no-underline" aria-label="share on LinkedIn">
       <svg  height="32px"  style="enable-background:new 0 0 65 65;" version="1.1" viewBox="0 0 65 65" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <path d="M50.837,48.137V36.425c0-6.275-3.35-9.195-7.816-9.195  c-3.604,0-5.219,1.983-6.119,3.374V27.71h-6.79c0.09,1.917,0,20.427,0,20.427h6.79V36.729c0-0.609,0.044-1.219,0.224-1.655  c0.49-1.22,1.607-2.483,3.482-2.483c2.458,0,3.44,1.873,3.44,4.618v10.929H50.837z M22.959,24.922c2.367,0,3.842-1.57,3.842-3.531  c-0.044-2.003-1.475-3.528-3.797-3.528s-3.841,1.524-3.841,3.528c0,1.961,1.474,3.531,3.753,3.531H22.959z M34,64  C17.432,64,4,50.568,4,34C4,17.431,17.432,4,34,4s30,13.431,30,30C64,50.568,50.568,64,34,64z M26.354,48.137V27.71h-6.789v20.427  H26.354z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
 </svg>
@@ -146,10 +146,16 @@ An example of different behavior could be contacting a different C2 to alert the
     <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><p>This post is a brief collection of anti-debugging and anti-analysis techniques that I found while reversing some samples. Anti-analysis techniques' purpose is to slow down the analysis as much as possible. By using these techniques a malware could detect if the malicious code is running in a monitored environment and decide to not execute at all or to behave differently, causing the analysis to be mislead.</p>
 <p>An example of different behavior could be contacting a different C2 to alert the attacker that some analysis is conducted on the binary (or to make superficial analysis lead to the wrong IOCs). Another example could be to behave non maliciously, leading the analyst to think that the binary is legit. Finally the most obvious behavior is to simply exit the program without any further action.</p>
 <p>The idea behind this post is to help junior analysts understand the meaning of some specific constants, API calls or sequence of API calls.</p>
-<h1 id="ntsetinformationthread-to-hide-a-thread-from-the-debugger">NtSetInformationThread to hide a thread from the debugger</h1>
+<h2 id="ntsetinformationthread-to-hide-a-thread-from-the-debugger">NtSetInformationThread to hide a thread from the debugger</h2>
 <p>This function call can be encountered when a new thread is created, more specifically to set the priority of the thread.</p>
-<p><img src="/antianalysis/image8.png" alt="NtSetInformationThread"></p>
-<p>The undocumented enum value 0x11 for the argument ThreadInformationClass corresponds to ThreadHideFromDebugger. So, by setting this value, a malware could create a debugger-invisible thread.
+<!-- raw HTML omitted -->
+<pre><code>__kernel_entry NTSYSCALLAPI NTSTATUS NtSetInformationThread(
+  HANDLE          ThreadHandle,
+  THREADINFOCLASS ThreadInformationClass,
+  PVOID           ThreadInformation,
+  ULONG           ThreadInformationLength
+);
+</code></pre><p>The undocumented enum value <strong>0x11</strong> for the argument ThreadInformationClass corresponds to <strong>ThreadHideFromDebugger</strong>. So, by setting this value, a malware could create a debugger-invisible thread.
 If a breakpoint is hit by a hidden thread the program crashes, because there is no debugger registered that can handle the trap.</p>
 <p>Example:</p>
 <pre><code>mov eax, [ebp+thread_handle]
@@ -160,11 +166,15 @@ mov [esp+th_handle], eax
 call NtSetInformationThread
 sub esp, 10h
 </code></pre><p>In this specific example, to get around this anti-analysis technique it is sufficient to reach the <code>call</code> instruction and then skip it (ctrl+N in IDA). The following <code>sub</code> instruction will clean up the stack.</p>
-<h1 id="detecting-malware-analysis-software-running-on-the-machine-by-using-findwindowa">Detecting malware analysis software running on the machine by using FindWindowA</h1>
+<h2 id="detecting-malware-analysis-software-running-on-the-machine-by-using-findwindowa">Detecting malware analysis software running on the machine by using FindWindowA</h2>
 <p>Some malware analysis tools are very common among the analysts. A technique of anti-analysis we can find in malware consists in detecting the programs running on the machine and checking if any of those are commonly used by malware analysts.</p>
 <p>The function FindWindowA retrieves a handle to the top-level window whose ClassName and WindowName match the specified strings (this is not case sensitive!). The general idea behind this anti-analysis technique is that if, for example, WinDbg is running, FindWindowA will retrieve a handle on the WinDbg window, whereas if it is not running it will return an error.</p>
-<p><img src="/antianalysis/image2.png" alt="FindWindowA"></p>
-<p>The function’s first argument is a pointer to a string that specifies the window class name and usually is very similar to the software name. Some interesting class names are:</p>
+<!-- raw HTML omitted -->
+<pre><code>HWND FindWindowA(
+  LPCSTR lpClassName,
+  LPCSTR lpWindowName
+);
+</code></pre><p>The function’s first argument is a pointer to a string that specifies the window class name and usually is very similar to the software name. Some interesting class names are:</p>
 <ul>
 <li>OLLYDBG</li>
 <li>TIdaWindow</li>
@@ -172,27 +182,41 @@ sub esp, 10h
 <li><a href="https://gist.github.com/atar-axis/b3e16ccf75852f7cb59a7e169be230b1">and more</a></li>
 </ul>
 <p>The second argument is the window name and if it is <code>NULL</code> all windows match.</p>
-<h1 id="detecting-malware-analysis-software-running-on-the-machine-by-using-createtoolhelp32snapshot">Detecting malware analysis software running on the machine by using CreateToolhelp32Snapshot</h1>
+<h2 id="detecting-malware-analysis-software-running-on-the-machine-by-using-createtoolhelp32snapshot">Detecting malware analysis software running on the machine by using CreateToolhelp32Snapshot</h2>
 <p>The WinAPI CreateToolhelp32Snaphot takes a snapshot of the specified (or all) processes running on the machine, as well as the heaps, modules and threads used by these processes.</p>
 <p>The function returns an open handle on the specified snapshot. This snapshot can be walked through by using two other WinAPIs: Process32First once and Process32Next for all the following processes.</p>
 <p>Finding those three API calls in a malicious binary could mean, for example, that it is looking for a specific process from whom to hide or to <em>inject into</em>.</p>
-<p><img src="/antianalysis/image5.png" alt="CreateToolhelp32Snapshot"></p>
-<h1 id="detecting-malware-analysis-software-from-dlls-in-memory">Detecting malware analysis software from DLLs in memory</h1>
+<!-- raw HTML omitted -->
+<pre><code>HANDLE CreateToolhelp32Snapshot(
+  DWORD dwFlags,
+  DWORD th32ProcessID
+);
+</code></pre><h2 id="detecting-malware-analysis-software-from-dlls-in-memory">Detecting malware analysis software from DLLs in memory</h2>
 <p>The majority of software has external dependencies, some of which are unique. If this is the case for an analysis software, the malware could detect the presence of a specific DLL in memory.</p>
 <p>To do this, it is necessary to know the name of said DLL. Then, invoking GetModuleHandleA, the code obtains a handle to the module or an error.</p>
-<p><img src="/antianalysis/image3.png" alt="GetModuleHandleA"></p>
-<h1 id="beingdebugged">BeingDebugged</h1>
+<!-- raw HTML omitted -->
+<pre><code>HMODULE GetModuleHandleA(
+  LPCSTR lpModuleName
+);
+</code></pre><h2 id="beingdebugged">BeingDebugged</h2>
 <p>To detect whether a process is being debugged or not, some malware checks the appropriate flag in the PEB table (Process Environment Block), which is a user-mode data structure that can be used by applications to get information on the process. In particular it indicates whether the program is being debugged. This flag is at offset 0x02 from the PEB base address. If it is set to 1, then it means that a debugger is attached to the process.</p>
 <p>Example of compiled code:</p>
 <pre><code>mov eax, large fs:30h	    // gets a pointer to the PEB base address
 cmp byte ptr [eax+2], 1	    // compares the flag BeingDebugged to 1
 jz short loc_4010E1
 </code></pre><p>The previous assembly code shows how to get the value of the flag. First it gets the base address of the PEB table which is stored in the registry <code>FS</code> at offset 0x30 (more details <a href="https://en.wikipedia.org/wiki/Win32_Thread_Information_Block">here</a>). Next, it accesses the offset 0x02 form the base of PEB, which corresponds to BeingDebugged.</p>
-<p><img src="/antianalysis/imageA.png" alt="structPEB"></p>
-<h1 id="isdebuggerpresent">IsDebuggerPresent</h1>
+<!-- raw HTML omitted -->
+<pre><code>struct _PEB {
+    0x000 BYTE InheritedAddressSpace;
+    0x001 BYTE ReadImageFileExecOptions;
+    0x002 BYTE BeingDebugged;
+    ...
+}
+</code></pre><h2 id="isdebuggerpresent">IsDebuggerPresent</h2>
 <p>Determines whether the calling process is being debugged by a user-mode debugger. This function has a very simple signature: does not take any parameters and returns a bool.</p>
-<p><img src="/antianalysis/image7.png" alt="IsDebuggerPresent"></p>
-<p>The return value of this function is 0 if the process is not being debugged, otherwise the return value is nonzero.
+<!-- raw HTML omitted -->
+<pre><code>BOOL IsDebuggerPresent();
+</code></pre><p>The return value of this function is 0 if the process is not being debugged, otherwise the return value is nonzero.
 Here is what the compiled implementation could look like (32 bit):</p>
 <pre><code>kernelbase_IsDebuggerPresent:
 mov     eax, large fs:18h    	// gets pointer to TEB          
@@ -201,19 +225,39 @@ movzx   eax, byte ptr [eax+2]	// gets value of BeingDebugged
 retn
 </code></pre><p>In the previous assembly code the function accesses the FS registry at offset 0x18 which contains a pointer to <a href="https://www.aldeid.com/wiki/TEB-Thread-Environment-Block">TEB</a> (Thread Environment Block). <a href="https://en.wikipedia.org/wiki/Win32_Thread_Information_Block">Source table</a>:</p>
 <p><img src="/antianalysis/image1.png" alt="TEBTable"></p>
-<p>Then it accesses offset TEB+0x30 which corresponds to a pointer to <a href="https://www.aldeid.com/wiki/PEB-Process-Environment-Block">PEB</a> (Process Environment Block). <a href="https://www.aldeid.com/wiki/TEB-Thread-Environment-Block">Source image</a>:</p>
-<p><img src="/antianalysis/imageB.png" alt="structTEB"></p>
-<p>Then it accesses the offset 0x02 from the base address of PEB, which corresponds to the variable BeingDebugged. <a href="https://www.aldeid.com/wiki/PEB-Process-Environment-Block">Source image</a>:</p>
-<p><img src="/antianalysis/imageA.png" alt="structPEB"></p>
-<h1 id="detecting-the-username">Detecting the username</h1>
+<p>Then it accesses offset TEB+0x30 which corresponds to a pointer to <a href="https://www.aldeid.com/wiki/PEB-Process-Environment-Block">PEB</a> (Process Environment Block). <a href="https://www.aldeid.com/wiki/TEB-Thread-Environment-Block">Here</a> a definition of TEB:</p>
+<!-- raw HTML omitted -->
+<pre><code>struct _TEB {
+    0x000 _NT_TIB NtTib;
+    0x01c void* EnvironmentPointer;
+    0x020 _CLIENT_ID ClientId;
+    0x028 void* ActiveRpcHandle;
+    0x02c void* ThreadLocalStoragePointer;
+    0x030 _PEB* ProcessEnvironmentBlock; 
+    ... 
+}
+</code></pre><p>Then it accesses the offset 0x02 from the base address of PEB, which corresponds to the variable BeingDebugged. A definition of PEB can be found <a href="https://www.aldeid.com/wiki/PEB-Process-Environment-Block">here</a>:</p>
+<!-- raw HTML omitted -->
+<pre><code>struct _PEB {
+    0x000 BYTE InheritedAddressSpace;
+    0x001 BYTE ReadImageFileExecOptions;
+    0x002 BYTE BeingDebugged;
+    ...
+}
+</code></pre><h2 id="detecting-the-username">Detecting the username</h2>
+<p>This technique could be used in both blocklist and allowlist mode.</p>
+<p>Some sandboxes have default usernames. Malware could bundle a list of the most common usernames used by the sandboxes and detect if the current username matches one of them.</p>
+<p>In case of a blocklist behavior, the malware would stop execution or drop any malicious act, while for the allowlist, the malicious code might want to execute only if the username matches the one of a target person.</p>
+<p>To obtain the username the function GetUserNameA can be used.</p>
+<!-- raw HTML omitted -->
+<pre><code>BOOL GetUserNameA(
+  LPSTR   lpBuffer,
+  LPDWORD pcbBuffer
+);
+</code></pre><!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
 <blockquote>
-<p>This technique could be used
-in both blocklist and allowlist mode.
-Some sandboxes have default usernames. Malware could bundle a list of the most common usernames used by the sandboxes and detect if the current username matches one of them.
-In case of a blocklist behavior, the malware would stop execution or drop any malicious act, while for the allowlist, the malicious code might want to execute only if the username matches the one of a target person.
-To obtain the username the function GetUserNameA can be used.</p>
 </blockquote>
-<p><img src="/antianalysis/image6.png" alt="GetUserNameA"></p>
 <ul class="pa0">
   
 </ul>
@@ -223,7 +267,20 @@ To obtain the username the function GetUserNameA can be used.</p>
       </div>
     </div>
 
-    <aside class="w-30-l mt6-l">
+    <aside class="w-30-l mt6-l"><div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">What&#39;s in this posts</p>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#ntsetinformationthread-to-hide-a-thread-from-the-debugger">NtSetInformationThread to hide a thread from the debugger</a></li>
+    <li><a href="#detecting-malware-analysis-software-running-on-the-machine-by-using-findwindowa">Detecting malware analysis software running on the machine by using FindWindowA</a></li>
+    <li><a href="#detecting-malware-analysis-software-running-on-the-machine-by-using-createtoolhelp32snapshot">Detecting malware analysis software running on the machine by using CreateToolhelp32Snapshot</a></li>
+    <li><a href="#detecting-malware-analysis-software-from-dlls-in-memory">Detecting malware analysis software from DLLs in memory</a></li>
+    <li><a href="#beingdebugged">BeingDebugged</a></li>
+    <li><a href="#isdebuggerpresent">IsDebuggerPresent</a></li>
+    <li><a href="#detecting-the-username">Detecting the username</a></li>
+  </ul>
+</nav>
+  </div>
 
 
 

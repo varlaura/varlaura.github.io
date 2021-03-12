@@ -1,19 +1,40 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>My New Hugo Site</title>
+    <title>var Blog, a variable blog...</title>
     <link>http://example.org/</link>
-    <description>Recent content on My New Hugo Site</description>
+    <description>Recent content on var Blog, a variable blog...</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 11 Mar 2021 21:02:46 +0100</lastBuildDate><atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 12 Mar 2021 11:15:15 +0100</lastBuildDate><atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Test1</title>
+      <title>Sneaky loading DLLs in a Windows executable</title>
+      <link>http://example.org/posts/sneaky-loading-dlls/</link>
+      <pubDate>Fri, 12 Mar 2021 11:15:15 +0100</pubDate>
+      
+      <guid>http://example.org/posts/sneaky-loading-dlls/</guid>
+      <description>This post is a walk through on how to load DLLs “manually” without the use of the WinAPI LoadLibrary and store APIs addresses in memory in order to make it less obvious which API functions are imported (and therefore used) by the malware.
+With this technique, the malware analyst cannot see which functions are imported from the Import section. It will be necessary to step through the code to find out which API functions are actually used.</description>
+    </item>
+    
+    <item>
+      <title>A collection of anti-analysis techniques for Windows</title>
+      <link>http://example.org/posts/anti-analysis-techniques-for-win/</link>
+      <pubDate>Thu, 11 Mar 2021 21:02:46 +0100</pubDate>
+      
+      <guid>http://example.org/posts/anti-analysis-techniques-for-win/</guid>
+      <description>This post is a brief collection of anti-debugging and anti-analysis techniques that I found while reversing some samples. Anti-analysis techniques&#39; purpose is to slow down the analysis as much as possible. By using these techniques a malware could detect if the malicious code is running in a monitored environment and decide to not execute at all or to behave differently, causing the analysis to be mislead.
+An example of different behavior could be contacting a different C2 to alert the attacker that some analysis is conducted on the binary (or to make superficial analysis lead to the wrong IOCs).</description>
+    </item>
+    
+    <item>
+      <title>A collection of anti-analysis techniques for Windows</title>
       <link>http://example.org/posts/test1/</link>
       <pubDate>Thu, 11 Mar 2021 21:02:46 +0100</pubDate>
       
       <guid>http://example.org/posts/test1/</guid>
-      <description></description>
+      <description>This post is a brief collection of anti-debugging and anti-analysis techniques that I found while reversing some samples. Anti-analysis techniques&#39; purpose is to slow down the analysis as much as possible. By using these techniques a malware could detect if the malicious code is running in a monitored environment and decide to not execute at all or to behave differently, causing the analysis to be mislead.
+An example of different behavior could be contacting a different C2 to alert the attacker that some analysis is conducted on the binary (or to make superficial analysis lead to the wrong IOCs).</description>
     </item>
     
   </channel>
