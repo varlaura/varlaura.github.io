@@ -1,0 +1,70 @@
+pre {
+    color:black;
+    background-color:#cccccc;
+    font-weight: 100;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+pre::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  pre {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+p code {
+    font-size: small !important;
+    font-weight: 500 !important;
+    border: solid 1px black;
+    padding: 3px;
+    background-color: #cccccc;
+}
+
+li code {
+    font-size: small;
+    background-color:#cccccc ;
+}
+
+body {
+    color: rgb(31, 31, 31) !important;
+    background-color:#e0e0e0 !important;
+}
+
+.serif,.athelas {
+    font-family: 'Open Sans', sans-serif !important;
+}
+
+p {
+    color:black !important;
+}
+
+ol {
+    color:black !important;
+}
+
+h2 {
+    color:black !important;
+}
+
+/*aside div {
+    background-color: rgb(31, 31, 31) !important;
+}*/
+
+body header div nav {
+    color:#cccccc !important;
+}
+
+/*nav a {
+    color:#000f7d !important;
+}*/
+
+a.f3 { /*mini title*/
+    color:#aaaaaa !important;
+}
+
+footer a{
+    color: #aaa !important;
+}
