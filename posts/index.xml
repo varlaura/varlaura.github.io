@@ -6,7 +6,18 @@
     <description>Recent content in Posts on var Blog: a variable blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 12 Mar 2021 11:15:15 +0100</lastBuildDate><atom:link href="https://varlaura.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 14 Mar 2021 17:37:31 +0100</lastBuildDate><atom:link href="https://varlaura.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Books and Resources</title>
+      <link>https://varlaura.github.io/posts/books-and-resources/</link>
+      <pubDate>Sun, 14 Mar 2021 17:37:31 +0100</pubDate>
+      
+      <guid>https://varlaura.github.io/posts/books-and-resources/</guid>
+      <description>Since I started working in threatintel and specifically analysing state sponsored attack, I felt the need to understand the geopolitical component connected to the malicious campaigns and attacks. In particular, I wanted to understand the historical and social component behind the cyber attack.
+So here is a list of my recently read books on the topic (language specified next to the resource):
+ &amp;ldquo;Active measures, the secret history of disinformation and political warfare&amp;rdquo;, Thomas Rid.</description>
+    </item>
+    
     <item>
       <title>Sneaky loading DLLs in a Windows executable</title>
       <link>https://varlaura.github.io/posts/sneaky-loading-dlls/</link>
